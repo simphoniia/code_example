@@ -11,13 +11,14 @@ struct RequestMetrics {
   std::atomic<long long> failure_requests;
 };
 
-void IncreaseMetric(kEventType event) {
-  static RequestMetrics metric;
+class Metrics {
+public:
+  static void IncreaseSuccess() { metrics_.success_requests++; }
+  static void IncreaseFailure() { metrics_.failure_requests++; }
+  static const RequestMetrics &GetMetrics() { return metrics_; }
 
-  if (event == kSuccessRequest)
-    metric.success_requests++;
-  else
-    metric.failure_requests++;
-}
+private:
+  static RequestMetrics metrics_;
+};
 
 } // namespace metrics

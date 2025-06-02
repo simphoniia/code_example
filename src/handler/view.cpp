@@ -9,7 +9,7 @@
 
 int views::HandleRequest(const request::HttpRequest &request) {
   try {
-    auto modules = std::move(builder::GetModules(request));
+    auto modules = std::move(builder::GetModulesPtrs(request));
 
     for (const auto &module : modules) {
       module->ProcessModule(request);
@@ -18,10 +18,10 @@ int views::HandleRequest(const request::HttpRequest &request) {
   } catch (std::exception &ex) {
     std::cerr << std::format(
         "While processing something went wrong {}, returning 500", ex.what());
-    metrics::IncreaseMetric(metrics::kEventType::kFailureRequest);
+    metrics::Metrics::IncreaseFailure();
     return http::kInternalServerError;
   }
 
-  metrics::IncreaseMetric(metrics::kEventType::kSuccessRequest);
+  metrics::Metrics::IncreaseSuccess();
   return http::kOk;
 }
