@@ -6,34 +6,9 @@
 #include <creater.hpp>
 #include <deadline.hpp>
 #include <engine.hpp>
-#include <randomizer.hpp>
 #include <view.hpp>
 
 namespace {
-std::string GetRandomUserHash() {
-  static utils::Randomizer randomizer;
-  constexpr int kHashSize = 32;
-
-  std::string user_hash;
-
-  for (size_t i = 0; i < 32; ++i) {
-    bool is_digit = randomizer.GetRandom(2);
-
-    if (is_digit) {
-      user_hash.push_back(static_cast<char>(randomizer.GetRandom(10)) + '0');
-      continue;
-    }
-
-    bool capital = randomizer.GetRandom(2);
-
-    if (capital)
-      user_hash.push_back(static_cast<char>(randomizer.GetRandom(27)) + 'A');
-    else
-      user_hash.push_back(static_cast<char>(randomizer.GetRandom(27)) + 'a');
-  }
-
-  return user_hash;
-}
 
 void PrepareComponents(
     std::vector<std::unique_ptr<component::Component>> &components,
