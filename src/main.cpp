@@ -2,8 +2,8 @@
 
 int main(void) {
   constexpr int kThreadSize = 50;
-  engine::RequestManager manager(kThreadSize);
-  manager.Run();
+  engine::RequestManager io(kThreadSize);
+  io.Run();
 
   return 0;
 }

@@ -3,43 +3,58 @@
 #include <optional>
 #include <unordered_map>
 
+#include <creater.hpp>
 #include <deadline.hpp>
 #include <engine.hpp>
+#include <randomizer.hpp>
 #include <view.hpp>
 
 namespace {
+std::string GetRandomUserHash() {
+  static utils::Randomizer randomizer;
+  constexpr int kHashSize = 32;
 
-std::optional<std::unique_ptr<component::Component>>
-CreateComponentByName(std::string name) {
-  if (name == "deadline")
-    return std::unique_ptr<component::Deadline>();
-  // else if (anothers...)
-  else
-    return std::nullopt;
+  std::string user_hash;
+
+  for (size_t i = 0; i < 32; ++i) {
+    bool is_digit = randomizer.GetRandom(2);
+
+    if (is_digit) {
+      user_hash.push_back(static_cast<char>(randomizer.GetRandom(10)) + '0');
+      continue;
+    }
+
+    bool capital = randomizer.GetRandom(2);
+
+    if (capital)
+      user_hash.push_back(static_cast<char>(randomizer.GetRandom(27)) + 'A');
+    else
+      user_hash.push_back(static_cast<char>(randomizer.GetRandom(27)) + 'a');
+  }
+
+  return user_hash;
 }
 
 void PrepareComponents(
     std::vector<std::unique_ptr<component::Component>> &components,
-    std::vector<std::string> list) {
-  for (auto &to_create : list) {
-    auto created_component = CreateComponentByName(to_create);
-    if (created_component.has_value())
-      components.push_back(created_component.value());
-  }
+    std::vector<component::kComponentTypes> &&list) {
+  components = std::move(component::CreateComponents(std::move(list)));
 }
 
 void ReadSocket(
     std::vector<std::unique_ptr<component::Component>> &components) {
-  std::string buffer; // = ReadSocket(...);
+  std::string buffer;
+  buffer.reserve(256);
+  /*
+    boost::asio::async_read(socket, response, [&](const system::error_code&
+    ec){});
+  */
   auto request = CreateHttpRequest(std::move(buffer));
   AcceptRequest(std::move(request), components);
 }
 
 request::HttpRequest &&CreateHttpRequest(std::string &&buffer) {
   request::Url url;
-  url.host = "localhost";
-  url.path = "/some/handler/in/my/service";
-  url.query = "?blocks=a,b,c?something=else?";
   request::HttpRequest request(request::kRequestType::kGet, std::move(url), {},
                                "request-body");
   return request;
@@ -58,7 +73,23 @@ void AcceptRequest(
     component->PostRequest(request);
   }
 
-  // answer to client with return_code and some body
+  ResponseRequest(return_code);
+}
+
+void ResponseRequest(int response_code) {
+  std::string response =
+      std::format("HTTP/1.1 {} {}\r\n\r\n"
+                  "<html>\r\n"
+                  "<body>\r\n"
+                  "<h1>Hello, World!</h1>\r\n"
+                  "</body>\r\n"
+                  "</html>\r\n\r\n",
+                  response_code, response_code == 200 ? "OK" : "FAILURE");
+
+  /*
+    boost::asio::async_write(socket, response, [&](const system::error_code&
+    ec){});
+  */
 }
 
 } // namespace
@@ -66,8 +97,9 @@ void AcceptRequest(
 namespace engine {
 
 void RequestManager::Run() {
-  PrepareComponents(components_, {"deadline"});
+  PrepareComponents(components_, {component::kDeadline, component::kRequester});
   // Work with sockets (boost asio or something)
+
   while (true) {
     // Some message from socket
     pool_.AddJob(ReadSocket, components_);

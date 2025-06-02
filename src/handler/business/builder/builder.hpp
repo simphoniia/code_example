@@ -14,7 +14,7 @@ std::optional<std::unique_ptr<modules::Module>> &&
 GetItemPtr(modules::kModulesType type) {
   switch (type) {
   case modules::kModulesType::kOffer:
-    return std::unique_ptr<modules::Offer>();
+    return std::unique_ptr<modules::Offer>(new modules::Offer());
   case modules::kModulesType::kBuy:
     return std::nullopt;
   case modules::kModulesType::kImage:
@@ -31,6 +31,6 @@ GetItemPtr(modules::kModulesType type) {
 }
 
 std::vector<std::unique_ptr<modules::Module>>
-GetModules(const request::HttpRequest &request);
+GetModulesPtrs(const request::HttpRequest &request);
 
 } // namespace builder
