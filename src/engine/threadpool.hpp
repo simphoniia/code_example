@@ -25,7 +25,7 @@ private:
   std::vector<std::thread> pool_;
 
   std::atomic<long long> task_counter_{};
-  std::mutex mutex;
+  std::mutex mutex_;
 
   void Run();
   void OnStop();

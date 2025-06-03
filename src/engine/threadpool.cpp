@@ -37,12 +37,12 @@ void ThreadPool::Run() {
     if (ToRelax(tasks_))
       continue;
 
-    if (!mutex.try_lock())
+    if (!mutex_.try_lock())
       continue;
 
     auto task = std::move(tasks_.front());
     tasks_.pop();
-    mutex.unlock();
+    mutex_.unlock();
 
     task_counter_++;
     task.get();

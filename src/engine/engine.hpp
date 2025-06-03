@@ -11,7 +11,7 @@ namespace engine {
 class RequestManager {
 public:
   RequestManager(size_t thread_size) : pool_(thread_size) {}
-  void Run();
+  void Run(std::vector<component::kComponentTypes> &&component_list);
 
 private:
   std::queue<request::HttpRequest> requests_;

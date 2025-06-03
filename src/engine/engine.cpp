@@ -3,7 +3,7 @@
 #include <optional>
 #include <unordered_map>
 
-#include <creater.hpp>
+#include <creator.hpp>
 #include <deadline.hpp>
 #include <engine.hpp>
 #include <view.hpp>
@@ -71,8 +71,9 @@ void ResponseRequest(int response_code) {
 
 namespace engine {
 
-void RequestManager::Run() {
-  PrepareComponents(components_, {component::kDeadline, component::kRequester});
+void RequestManager::Run(
+    std::vector<component::kComponentTypes> &&component_list) {
+  PrepareComponents(components_, std::move(component_list));
   // Work with sockets (boost asio or something)
 
   while (true) {
